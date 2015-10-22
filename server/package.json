@@ -18,5 +18,8 @@
   "homepage": "https://github.com/prince1809/angularjs-app#readme",
   "dependencies": {
     "express": "^4.13.3"
+  },
+  "devDependencies": {
+    "open": "0.0.5"
   }
 }
