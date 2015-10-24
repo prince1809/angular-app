@@ -9,7 +9,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task
-  grunt.registerTask('default',['clean','copy']);
+  grunt.registerTask('default',['clean','copy','concat']);
 
   // Project configuration
   grunt.initConfig({
@@ -26,11 +26,24 @@ module.exports = function(grunt) {
     copy: {
       assets: {
         files: [{ dest: '<%= distdir %>', src: '**', expand: true, cwd: 'src/assets' }]
-      },
-      index: {
-        files: [{ dest: '<%= distdir %>', src: '*.html', expand: true,  cwd: 'src/'}]
       }
     },
+    concat: {
+      dist: {
+        options: {
+          banner: "<%= banner %>"
+        },
+        src: '<%= src.js %>',
+        dest: '<%= distdir %>/<%= pkg.name %>.js'
+      },
+      index: {
+        src: ['src/index.html'],
+        dest: '<%= distdir %>/index.html',
+        options: {
+          process: true
+        }
+      }
+    }
 
   });
 };
