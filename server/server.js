@@ -6,17 +6,17 @@ var config = require('./config.js');
 
 var app = express();
 var server = http.createServer(app);
-
+require('./lib/routes/static').addRoutes(app, config);
 
 app.use(function(req,res,next){
   if( req.user ){
     console.log('Current user: ', req.user.firstName, req.user.lastName);
   }else{
-    console.log('Unauthenticated');
+    console.log('*************');
   }
   next();
 });
-app.all('/*',function(req,res){
+app.all('/',function(req,res){
   res.sendFile('index.html', {root: config.server.distFolder});
 });
 
