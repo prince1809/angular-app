@@ -1,15 +1,18 @@
-var app = angular.module('app',[]);
+angular.module('app',[]);
 
-app.controller('AppCtrl', function($scope){
+angular.module('app').controller('AppCtrl', ['$scope',function($scope){
 
-  $scope.name = {
-    firstName: "Prince",
-    lastName: "Kumar",
+  $scope.notifications = "Some notifications";
 
-  fullName: function(){
-    var nameObject;
-    nameObject = $scope.name;
-    return nameObject.firstName + " " + nameObject.lastName;
-  }
-};
-});
+  $scope.removeNotification = function(notification){
+    i18nNotifications.remove(notification);
+  };
+
+  
+}]);
+
+angular.module('app').controller('HeaderCtrl',['$scope', function($scope){
+
+  $scope.title = "Header";
+
+}]);

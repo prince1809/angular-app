@@ -16,7 +16,7 @@ app.use(function(req,res,next){
   }
   next();
 });
-app.all('/',function(req,res){
+app.all('/',function(req,res, next){
   res.sendFile('index.html', {root: config.server.distFolder});
 });
 
