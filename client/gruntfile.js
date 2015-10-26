@@ -8,9 +8,15 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-recess');
+  grunt.loadNpmTasks('grunt-html2js');
 
   // Default task
-  grunt.registerTask('default',['clean','copy','concat','recess']);
+  grunt.registerTask('default',['clean','html2js','copy','concat','recess']);
+
+  //print a timestamp
+  grunt.registerTask('timestamp', function(){
+    grunt.log.subhead(Data());
+  });
 
   // Project configuration
   grunt.initConfig({
@@ -18,16 +24,32 @@ module.exports = function(grunt) {
     distdir: 'dist',
     pkg: grunt.file.readJSON('package.json'),
     banner:
-    '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n',
+    '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+    '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
+    ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %> Prince;\n' +
+    ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n */\n',
     src: {
       js: ['src/**/*.js'],
       html: ['src/index.html'],
+      tpl: {
+        app: ['src/app/**/*.tpl.html']
+      },
       less: ['src/less/stylesheet.less']
     },
     clean: ['<%= distdir %>/*'],
     copy: {
       assets: {
         files: [{ dest: '<%= distdir %>', src: '**', expand: true, cwd: 'src/assets' }]
+      }
+    },
+    html2js: {
+      app: {
+        options: {
+          base: 'src/app'
+        },
+        src: ['<%= src.tpl.app %>'],
+        dest: '<%= distdir %>/templates/app.js',
+        module: 'templates.app'
       }
     },
     concat: {
