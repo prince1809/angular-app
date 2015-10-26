@@ -9,7 +9,8 @@ npm install<br/>
 node server.js<br/>
 
 ##################################
-########Client configuration######
+
+#### Client configuration######
 
 cd client<br/>
 npm install<br/>
