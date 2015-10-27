@@ -1,6 +1,7 @@
 angular.module('app',[
   'ngRoute',
   'projectsinfo',
+  'projects',
   'templates.app',
   'templates.common']);
 

@@ -6,6 +6,7 @@
 angular.module('app',[
   'ngRoute',
   'projectsinfo',
+  'projects',
   'templates.app',
   'templates.common']);
 
@@ -55,13 +56,28 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
 
 }]);
 
+angular.module('projects', ['resources.projects'])
+
+.config(['$routeProvider', function($routeProvider){
+
+  $routeProvider.when('/projects', {
+    templateUrl: 'projects/projects-list.tpl.html',
+    controller: 'ProjectsViewCtrl',
+    resolve: {
+      projects: ['Projects', function(){
+        return Projects.all();
+      }]
+    }
+  });
+}]);
+
 angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
 
   $routeProvider.when('/projectsinfo', {
     templateUrl: 'projectsinfo/list.tpl.html',
     controller: 'ProjectsInfoCtrl',
     resolve: {
-      //projects: ['Projects',function(Projects){
+    //  projects: ['Projects',function(Projects){
       //  return Projects.all();
     //  }]
     }
@@ -69,8 +85,14 @@ angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
 }]);
 
 angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope', function($scope){
-  //$scope.projects = projects;
+//  $scope.projects = projects;
 }]);
+
+angular.module('resources.projects', []);
+angular.module('resources.projects').factory('Projects',function(){
+  var Projects = "something";
+  return Projects;
+});
 
 angular.module('services.i18nNotifications',['services.notifications']);
 
@@ -80,7 +102,7 @@ angular.module('services.i18nNotifications').factory('i18nNotifications',[functi
   return 'something';
 }]);
 
-angular.module('templates.app', ['header.tpl.html', 'notifications.tpl.html', 'projectsinfo/list.tpl.html']);
+angular.module('templates.app', ['header.tpl.html', 'notifications.tpl.html', 'projects/projects-list.tpl.html', 'projectsinfo/list.tpl.html']);
 
 angular.module("header.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("header.tpl.html",
@@ -95,6 +117,29 @@ angular.module("notifications.tpl.html", []).run(["$templateCache", function($te
     "<div>\n" +
     "  This is notification bar\n" +
     "</div>\n" +
+    "");
+}]);
+
+angular.module("projects/projects-list.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("projects/projects-list.tpl.html",
+    "<table class=\"table table-bordered table-condensed table-striped table-hover\">\n" +
+    "  <thead>\n" +
+    "    <tr>\n" +
+    "      <th class=\"span3\">Name</th>\n" +
+    "      <th class=\"span5\">Description</th>\n" +
+    "      <th class=\"span2\">My Role</th>\n" +
+    "      <th class=\"span2\">Tools</th>\n" +
+    "    </tr>\n" +
+    "  </thead>\n" +
+    "  <tbody>\n" +
+    "    <tr ng-repeat=\"project in projects\">\n" +
+    "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.name}}</td>\n" +
+    "    </tr>\n" +
+    "  </tbody>\n" +
+    "</table>\n" +
     "");
 }]);
 
