@@ -1,12 +1,17 @@
-angular.module('app',['ngRoute','templates.app','templates.common']);
+angular.module('app',[
+  'ngRoute',
+  'projectsinfo',
+  'templates.app',
+  'templates.common']);
 
 angular.module('app').constant('I18N.MESSAGES', {
   'errors.route.changeError': 'Route change error'
 });
 
-//angular.module('app').config(['$routeProvider', function($routeProvider){
-  //$routeProvider.otherwise({ redirectTo: '/projectsinfo'});
-//}]);
+angular.module('app').config(['$routeProvider','$locationProvider', function($routeProvider,$locationProvider){
+  $locationProvider.html5Mode(true);
+  $routeProvider.otherwise({ redirectTo: '/projectsinfo'});
+}]);
 
 angular.module('app').controller('AppCtrl', ['$scope',function($scope){
 
@@ -25,5 +30,22 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
   function($scope,$location){
 
   $scope.location = $location;
+  $scope.breadcrumbs = 'breadcrumbs';
+
+  $scope.isAuthenticated = 'no';
+
+  $scope.isAdmin = 'Yes';
+
+  $scope.home = function(){
+    $location.path('/projectsinfo');
+  };
+
+  $scope.isNavbarActive = function(navBarPath){
+    return navBarPath === 'something';
+  };
+
+  $scope.hasPendingRequests = function(){
+    return false;
+  };
 
 }]);

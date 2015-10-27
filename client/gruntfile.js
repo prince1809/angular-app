@@ -128,7 +128,7 @@ module.exports = function(grunt) {
     },
     watch: {
       all: {
-        files: ['<%= src.js %>','<%= src.html %>'],
+        files: ['<%= src.js %>','<%= src.tpl.app %>','<%= src.tpl.common %>','<%= src.html %>'],
         tasks: ['default','timestamp']
       },
       build: {
