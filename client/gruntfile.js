@@ -15,7 +15,7 @@ module.exports = function(grunt) {
 
   //print a timestamp
   grunt.registerTask('timestamp', function(){
-    grunt.log.subhead(Data());
+    grunt.log.subhead(Date());
   });
 
   // Project configuration
@@ -30,11 +30,14 @@ module.exports = function(grunt) {
     ' * Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %>\n */\n',
     src: {
       js: ['src/**/*.js'],
+      jsTpl: ['<%= distdir %>/templates/**/*.js'],
       html: ['src/index.html'],
       tpl: {
-        app: ['src/app/**/*.tpl.html']
+        app: ['src/app/**/*.tpl.html'],
+        common: ['src/common/**/*.tpl.html']
       },
-      less: ['src/less/stylesheet.less']
+      less: ['src/less/stylesheet.less'],
+      lessWatch: ['src/less/**/*.less']
     },
     clean: ['<%= distdir %>/*'],
     copy: {
@@ -50,6 +53,14 @@ module.exports = function(grunt) {
         src: ['<%= src.tpl.app %>'],
         dest: '<%= distdir %>/templates/app.js',
         module: 'templates.app'
+      },
+      common: {
+        options: {
+          base: 'src/common'
+        },
+        src: ['<%= src.tpl.common %>'],
+        dest: '<%= distdir %>/templates/common.js',
+        module: 'templates.common'
       }
     },
     concat: {
@@ -57,7 +68,7 @@ module.exports = function(grunt) {
         options: {
           banner: "<%= banner %>"
         },
-        src: '<%= src.js %>',
+        src: ['<%= src.js %>','<%= src.jsTpl %>'],
         dest: '<%= distdir %>/<%= pkg.name %>.js'
       },
       index: {
@@ -84,6 +95,19 @@ module.exports = function(grunt) {
         dest: '<%= distdir %>/jquery.js'
       }
     },
+    uglify: {
+      dist: {
+        options: {
+          banner: "<%= banner %>"
+        },
+        src: ['<%= src.js %>','<%= src.jsTpl %>'],
+        dest: '<%= distdir %>/<%= pkg.name %>.js'
+      },
+      angular: {
+        src: ['<%= concat.angular.src %>'],
+        dest: '<%= distdir %>/angular.js'
+      }
+    },
     recess: {
       build: {
         files: {
@@ -102,6 +126,16 @@ module.exports = function(grunt) {
         }
       }
     },
+    watch: {
+      all: {
+        files: ['<%= src.js %>','<%= src.html %>'],
+        tasks: ['default','timestamp']
+      },
+      build: {
+        files: ['<%= src.js %>','<%= src.html %>'],
+        tasks: ['default','timestamp']
+      }
+    }
 
   });
 };
