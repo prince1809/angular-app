@@ -4,13 +4,13 @@ angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
     templateUrl: 'projectsinfo/list.tpl.html',
     controller: 'ProjectsInfoCtrl',
     resolve: {
-    //  projects: ['Projects',function(Projects){
-      //  return Projects.all();
-    //  }]
+      projects: ['Projects',function(Projects){
+        return Projects;
+      }]
     }
   });
 }]);
 
-angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope', function($scope){
-//  $scope.projects = projects;
+angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','projects', function($scope,projects){
+  $scope.projects = projects;
 }]);

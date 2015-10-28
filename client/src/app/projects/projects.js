@@ -7,7 +7,7 @@ angular.module('projects', ['resources.projects'])
     controller: 'ProjectsViewCtrl',
     resolve: {
       projects: ['Projects', function(){
-        return Projects.all();
+        return "Some Projects";
       }]
     }
   });

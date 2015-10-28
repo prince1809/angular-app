@@ -10,6 +10,12 @@ angular.module('app',[
   'templates.app',
   'templates.common']);
 
+
+angular.module('app').constant('MONGOLAB_CONFIG',{
+  baseUrl: '/databases/',
+  dbName: 'ascrum'
+});
+
 angular.module('app').constant('I18N.MESSAGES', {
   'errors.route.changeError': 'Route change error'
 });
@@ -65,7 +71,7 @@ angular.module('projects', ['resources.projects'])
     controller: 'ProjectsViewCtrl',
     resolve: {
       projects: ['Projects', function(){
-        return Projects.all();
+        return "Some Projects";
       }]
     }
   });
@@ -77,22 +83,26 @@ angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
     templateUrl: 'projectsinfo/list.tpl.html',
     controller: 'ProjectsInfoCtrl',
     resolve: {
-    //  projects: ['Projects',function(Projects){
-      //  return Projects.all();
-    //  }]
+      projects: ['Projects',function(Projects){
+        return Projects;
+      }]
     }
   });
 }]);
 
-angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope', function($scope){
-//  $scope.projects = projects;
+angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','projects', function($scope,projects){
+  $scope.projects = projects;
 }]);
 
-angular.module('resources.projects', []);
-angular.module('resources.projects').factory('Projects',function(){
-  var Projects = "something";
+angular.module('resources.projects', ['mongolabResource']);
+angular.module('resources.projects').factory('Projects',['mongolabResource',function($mongolabResource){
+
+  var Projects = "Nothing to display";
+
+
   return Projects;
-});
+
+}]);
 
 angular.module('services.i18nNotifications',['services.notifications']);
 

@@ -5,6 +5,12 @@ angular.module('app',[
   'templates.app',
   'templates.common']);
 
+
+angular.module('app').constant('MONGOLAB_CONFIG',{
+  baseUrl: '/databases/',
+  dbName: 'ascrum'
+});
+
 angular.module('app').constant('I18N.MESSAGES', {
   'errors.route.changeError': 'Route change error'
 });
