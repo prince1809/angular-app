@@ -3,11 +3,42 @@
  * Copyright (c) 2015  Prince;
  * Licensed 
  */
+angular.module('admin',['admin-projects']);
+
+angular.module('admin-projects',[
+
+])
+
+.config(['$routeProvider', function($routeProvider){
+
+  $routeProvider.when('/admin/projects', {
+    templateUrl: 'admin/projects/projects-list.tpl.html',
+    controller: 'ProjectsListCtrl',
+    resolve: {
+      projects: ['Projects', function(Projects){
+        return Projects;
+      }]
+    }
+  });
+
+}])
+.controller('ProjectsListCtrl',['$scope',function($scope){
+
+
+}])
+.controller('ProjectsEditCtrl',['$scope',function($scope){
+
+}])
+.controller('TeamMembersController',['$scope',function($scope){
+
+}]);
+
 angular.module('app',[
   'ngRoute',
   'projectsinfo',
   'dashboard',
   'projects',
+  'admin',
   'templates.app',
   'templates.common']);
 
@@ -39,8 +70,8 @@ angular.module('app').controller('AppCtrl', ['$scope',function($scope){
   });
 }]);
 
-angular.module('app').controller('HeaderCtrl',['$scope', '$location',
-  function($scope,$location){
+angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
+  function($scope,$location,$route){
 
   $scope.location = $location;
   $scope.breadcrumbs = 'breadcrumbs';
@@ -50,7 +81,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
   $scope.isAdmin = 'Yes';
 
   $scope.home = function(){
-  //  $location.path('/projectsinfo');
+    $location.path('/dashboard');
   };
 
   $scope.isNavbarActive = function(navBarPath){
@@ -122,6 +153,13 @@ angular.module('resources.projects', ['mongolabResource']);
 angular.module('resources.projects').factory('Projects',['mongolabResource',function($mongolabResource){
 
   var Projects = $mongolabResource['projects'];
+   Projects.forUser = function(userId,successcb,errorcb){
+    return Projects.query({},successcb,errorcb);
+  }
+
+  Projects.prototype.isProductOwner = function(userId){
+    return this.productOwner === userId;
+  }
 
   return Projects;
 
@@ -135,7 +173,37 @@ angular.module('services.i18nNotifications').factory('i18nNotifications',[functi
   return 'something';
 }]);
 
-angular.module('templates.app', ['dashboard/dashboard.tpl.html', 'header.tpl.html', 'notifications.tpl.html', 'projects/projects-list.tpl.html', 'projectsinfo/list.tpl.html']);
+angular.module('templates.app', ['admin/projects/projects-edit.tpl.html', 'admin/projects/projects-list.tpl.html', 'dashboard/dashboard.tpl.html', 'header.tpl.html', 'notifications.tpl.html', 'projects/projects-list.tpl.html', 'projectsinfo/list.tpl.html']);
+
+angular.module("admin/projects/projects-edit.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("admin/projects/projects-edit.tpl.html",
+    "<div class=\"well\">\n" +
+    "  \n" +
+    "</div>\n" +
+    "");
+}]);
+
+angular.module("admin/projects/projects-list.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("admin/projects/projects-list.tpl.html",
+    "<table class=\"table table-bordered table-condensed table-striped table-hover\">\n" +
+    "  <thead>\n" +
+    "    <tr>\n" +
+    "      <th>Name </th>\n" +
+    "      <th>Description </th>\n" +
+    "    </tr>\n" +
+    "  </thead>\n" +
+    "  <tbody>\n" +
+    "    <tr ng-repeat=\"project in projects\" ng-click=\"edit(project.$id())\">\n" +
+    "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.desc}}</td>\n" +
+    "    </tr>\n" +
+    "  </tbody>\n" +
+    "</table>\n" +
+    "<div class=\"well\">\n" +
+    "  <button class=\"btn\" ng-click=\"new()\">New Project</button>\n" +
+    "</div>\n" +
+    "");
+}]);
 
 angular.module("dashboard/dashboard.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("dashboard/dashboard.tpl.html",
@@ -178,11 +246,11 @@ angular.module("header.tpl.html", []).run(["$templateCache", function($templateC
     "        <a href=\"/projectsinfo\">Current Projects</a>\n" +
     "      </li>\n" +
     "    </ul>\n" +
-    "    <ul class=\"nav\" ng-show=\"isAuthenticated()\">\n" +
+    "    <ul class=\"nav\">\n" +
     "      <li ng-class=\"{active:isNavbarActive('projects')}\">\n" +
     "        <a href=\"/projects\">My Projects</a>\n" +
     "      </li>\n" +
-    "      <li class=\"dropdown\" ng-class=\"{active:isNavbarActive('admin'), open:isAdminOpen}\" ng-show=\"isAdmin()\">\n" +
+    "      <li class=\"dropdown\" ng-class=\"{active:isNavbarActive('admin'), open:isAdminOpen}\">\n" +
     "        <a id=\"adminmenu\" role=\"button\" class=\"dropdown-toggle\" ng-click=\"isAdminOpen=!isAdminOpen\">Admin<b class=\"caret\"></b></a>\n" +
     "        <ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"adminmenu\">\n" +
     "          <li><a tabindex=\"-1\" href=\"/admin/projects\" ng-click=\"isAdminOpen=false\">Manage Projects</a></li>\n" +
@@ -195,14 +263,24 @@ angular.module("header.tpl.html", []).run(["$templateCache", function($templateC
     "      <li><a href=\"#\"><img src=\"/static/img/spinner.gif\"></a></li>\n" +
     "    </ul>\n" +
     "  </div>\n" +
+    "  <div class=\"breadcrumbs\">\n" +
+    "    <li ng-repeat=\"breadcrumb in breadcrumbs.getAll()\">\n" +
+    "      <span class=\"divider\">/</span>\n" +
+    "      <ng-switch on=\"$last\">\n" +
+    "        <span ng-switch-when=\"true\">{{breadcrumb.name}}</span>\n" +
+    "        <span ng-switch-default><a href=\"{{breadcrumb.path}}\">{{breadcrumb.name}}</a></span>\n" +
+    "      </ng-switch>\n" +
+    "    </li>\n" +
+    "  </div>\n" +
     "</div>\n" +
     "");
 }]);
 
 angular.module("notifications.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("notifications.tpl.html",
-    "<div>\n" +
-    "  This is notification bar\n" +
+    "<div ng-class=\"['alert','alert-'+notification.type]\" ng-repeat=\"notification in notifications.getCurrent()\">\n" +
+    "  <button class=\"close\" ng-click=\"removeNotification(notification)\">x</button>\n" +
+    "  {{notification.message}}\n" +
     "</div>\n" +
     "");
 }]);

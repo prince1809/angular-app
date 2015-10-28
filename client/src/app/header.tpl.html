@@ -6,11 +6,11 @@
         <a href="/projectsinfo">Current Projects</a>
       </li>
     </ul>
-    <ul class="nav" ng-show="isAuthenticated()">
+    <ul class="nav">
       <li ng-class="{active:isNavbarActive('projects')}">
         <a href="/projects">My Projects</a>
       </li>
-      <li class="dropdown" ng-class="{active:isNavbarActive('admin'), open:isAdminOpen}" ng-show="isAdmin()">
+      <li class="dropdown" ng-class="{active:isNavbarActive('admin'), open:isAdminOpen}">
         <a id="adminmenu" role="button" class="dropdown-toggle" ng-click="isAdminOpen=!isAdminOpen">Admin<b class="caret"></b></a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="adminmenu">
           <li><a tabindex="-1" href="/admin/projects" ng-click="isAdminOpen=false">Manage Projects</a></li>

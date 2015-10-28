@@ -3,6 +3,7 @@ angular.module('app',[
   'projectsinfo',
   'dashboard',
   'projects',
+  'admin',
   'templates.app',
   'templates.common']);
 
@@ -34,8 +35,8 @@ angular.module('app').controller('AppCtrl', ['$scope',function($scope){
   });
 }]);
 
-angular.module('app').controller('HeaderCtrl',['$scope', '$location',
-  function($scope,$location){
+angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
+  function($scope,$location,$route){
 
   $scope.location = $location;
   $scope.breadcrumbs = 'breadcrumbs';
@@ -45,7 +46,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
   $scope.isAdmin = 'Yes';
 
   $scope.home = function(){
-  //  $location.path('/projectsinfo');
+    $location.path('/dashboard');
   };
 
   $scope.isNavbarActive = function(navBarPath){
