@@ -6,6 +6,7 @@
 angular.module('app',[
   'ngRoute',
   'projectsinfo',
+  'dashboard',
   'projects',
   'templates.app',
   'templates.common']);
@@ -62,6 +63,8 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
 
 }]);
 
+angular.module('dashboard',[]);
+
 angular.module('projects', ['resources.projects'])
 
 .config(['$routeProvider', function($routeProvider){
@@ -97,8 +100,7 @@ angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','project
 angular.module('resources.projects', ['mongolabResource']);
 angular.module('resources.projects').factory('Projects',['mongolabResource',function($mongolabResource){
 
-  var Projects = "Nothing to display";
-
+  var Projects = $mongolabResource['projects'];
 
   return Projects;
 
@@ -112,7 +114,38 @@ angular.module('services.i18nNotifications').factory('i18nNotifications',[functi
   return 'something';
 }]);
 
-angular.module('templates.app', ['header.tpl.html', 'notifications.tpl.html', 'projects/projects-list.tpl.html', 'projectsinfo/list.tpl.html']);
+angular.module('templates.app', ['dashboard/dashboard.tpl.html', 'header.tpl.html', 'notifications.tpl.html', 'projects/projects-list.tpl.html', 'projectsinfo/list.tpl.html']);
+
+angular.module("dashboard/dashboard.tpl.html", []).run(["$templateCache", function($templateCache) {
+  $templateCache.put("dashboard/dashboard.tpl.html",
+    "<h4>My Projects</h4>\n" +
+    "<div ng-include=\"'projects/projects-list.tpl.html'\">\n" +
+    "\n" +
+    "</div>\n" +
+    "<h4>My Tasks</h4>\n" +
+    "<table class=\"table table-bordered table-condensed table-striped table-hover\">\n" +
+    "  <thead>\n" +
+    "    <tr>\n" +
+    "      <th class=\"span8\">Name</th>\n" +
+    "      <th class=\"span1\">Estimation</th>\n" +
+    "      <th class=\"span1\">Remaining</th>\n" +
+    "      <th class=\"span2\">Tools</th>\n" +
+    "    </tr>\n" +
+    "  </thead>\n" +
+    "  <tbody>\n" +
+    "    <tr ng-repeat=\"task in tasks\">\n" +
+    "      <td>{{task.name}}</td>\n" +
+    "      <td>{{task.estimation}}</td>\n" +
+    "      <td>{{task.remaining}}</td>\n" +
+    "      <td></td>\n" +
+    "    </tr>\n" +
+    "    <tr ng-show=\"!tasks.length\">\n" +
+    "      <td colspan=\"4\"> No Tasks for You!</td>\n" +
+    "    </tr>\n" +
+    "  </tbody>\n" +
+    "</table>\n" +
+    "");
+}]);
 
 angular.module("header.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("header.tpl.html",

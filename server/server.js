@@ -2,6 +2,7 @@ var fs = require('fs');
 var express = require('express');
 var http = require('http');
 var https = require('https');
+require('express-namespace');
 
 var errorhandler = require('errorhandler');
 
@@ -26,11 +27,12 @@ app.use(function(req,res,next){
   }
   next();
 });
-app.all('/',function(req,res, next){
-  res.sendFile('index.html', {root: config.server.distFolder});
+
+app.namespace('/databases/:db/collections/:collection*', function(){
+  
 });
 
-//require('./lib/routes/security').addRoutes(app, security);
+require('./lib/routes/appFile').addRoutes(app,config);
 
 app.use(errorhandler({ dumpExceptions: true, showStack: true}));
 

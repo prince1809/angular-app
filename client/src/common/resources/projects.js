@@ -1,8 +1,7 @@
 angular.module('resources.projects', ['mongolabResource']);
 angular.module('resources.projects').factory('Projects',['mongolabResource',function($mongolabResource){
 
-  var Projects = "Nothing to display";
-
+  var Projects = $mongolabResource['projects'];
 
   return Projects;
 

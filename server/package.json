@@ -19,6 +19,7 @@
   "dependencies": {
     "errorhandler": "^1.4.2",
     "express": "^4.13.3",
+    "express-namespace": "^0.1.1",
     "passport": "^0.3.0"
   },
   "devDependencies": {
