@@ -6,9 +6,13 @@ angular.module('projects', ['resources.projects'])
     templateUrl: 'projects/projects-list.tpl.html',
     controller: 'ProjectsViewCtrl',
     resolve: {
-      projects: ['Projects', function(){
-        return "Some Projects";
+      projects: ['Projects', function(Projects){
+        return Projects;
       }]
     }
   });
+}])
+
+.controller('ProjectsViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
+  $scope.projects = projects;
 }]);

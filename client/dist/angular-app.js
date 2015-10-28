@@ -1,4 +1,4 @@
-/*! angular-app - v1.0.0 - 2015-10-28
+/*! angular-app - v1.0.0 - 2015-10-29
  * http://princekr.com
  * Copyright (c) 2015  Prince;
  * Licensed 
@@ -23,7 +23,7 @@ angular.module('app').constant('I18N.MESSAGES', {
 
 angular.module('app').config(['$routeProvider','$locationProvider', function($routeProvider,$locationProvider){
   $locationProvider.html5Mode(true);
-  $routeProvider.otherwise({ redirectTo: '/projectsinfo'});
+  //$routeProvider.otherwise({ redirectTo: '/projectsinfo'});
 }]);
 
 angular.module('app').controller('AppCtrl', ['$scope',function($scope){
@@ -50,7 +50,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
   $scope.isAdmin = 'Yes';
 
   $scope.home = function(){
-    $location.path('/projectsinfo');
+  //  $location.path('/projectsinfo');
   };
 
   $scope.isNavbarActive = function(navBarPath){
@@ -63,7 +63,24 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location',
 
 }]);
 
-angular.module('dashboard',[]);
+angular.module('dashboard', ['resources.projects'])
+
+.config(['$routeProvider', function($routeProvider){
+
+  $routeProvider.when('/dashboard', {
+    templateUrl: 'dashboard/dashboard.tpl.html',
+    controller: 'DashboardCtrl',
+    resolve: {
+      projects: ['Projects', function(Projects){
+        return Projects;
+      }]
+    }
+  });
+}])
+
+.controller('DashboardCtrl',['$scope','$location','projects',function($scope,$location,projects){
+  $scope.projects = projects;
+}]);
 
 angular.module('projects', ['resources.projects'])
 
@@ -73,11 +90,15 @@ angular.module('projects', ['resources.projects'])
     templateUrl: 'projects/projects-list.tpl.html',
     controller: 'ProjectsViewCtrl',
     resolve: {
-      projects: ['Projects', function(){
-        return "Some Projects";
+      projects: ['Projects', function(Projects){
+        return Projects;
       }]
     }
   });
+}])
+
+.controller('ProjectsViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
+  $scope.projects = projects;
 }]);
 
 angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
