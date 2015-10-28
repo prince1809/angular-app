@@ -171,7 +171,30 @@ angular.module("dashboard/dashboard.tpl.html", []).run(["$templateCache", functi
 angular.module("header.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("header.tpl.html",
     "<div class=\"navbar\" ng-controller=\"HeaderCtrl\">\n" +
-    "  This is header area {{ breadcrumbs }}\n" +
+    "  <div class=\"navbar-inner\">\n" +
+    "    <a class=\"brand\" ng-click=\"home()\">Prince</a>\n" +
+    "    <ul class=\"nav\">\n" +
+    "      <li ng-class=\"{active:isNavbarActive('projectsinfo')}\">\n" +
+    "        <a href=\"/projectsinfo\">Current Projects</a>\n" +
+    "      </li>\n" +
+    "    </ul>\n" +
+    "    <ul class=\"nav\" ng-show=\"isAuthenticated()\">\n" +
+    "      <li ng-class=\"{active:isNavbarActive('projects')}\">\n" +
+    "        <a href=\"/projects\">My Projects</a>\n" +
+    "      </li>\n" +
+    "      <li class=\"dropdown\" ng-class=\"{active:isNavbarActive('admin'), open:isAdminOpen}\" ng-show=\"isAdmin()\">\n" +
+    "        <a id=\"adminmenu\" role=\"button\" class=\"dropdown-toggle\" ng-click=\"isAdminOpen=!isAdminOpen\">Admin<b class=\"caret\"></b></a>\n" +
+    "        <ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"adminmenu\">\n" +
+    "          <li><a tabindex=\"-1\" href=\"/admin/projects\" ng-click=\"isAdminOpen=false\">Manage Projects</a></li>\n" +
+    "          <li><a tabindex=\"-1\" href=\"/admin/users\" ng-click=\"isAdminOpen=false\">Manage Users</a></li>\n" +
+    "        </ul>\n" +
+    "      </li>\n" +
+    "    </ul>\n" +
+    "    <ul class=\"nav pull-right\" ng-show=\"hasPendingRequests()\">\n" +
+    "      <li class=\"divider-vertical\"></li>\n" +
+    "      <li><a href=\"#\"><img src=\"/static/img/spinner.gif\"></a></li>\n" +
+    "    </ul>\n" +
+    "  </div>\n" +
     "</div>\n" +
     "");
 }]);
