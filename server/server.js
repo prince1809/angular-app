@@ -3,11 +3,14 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 
+var errorhandler = require('errorhandler');
+
 var privatekey = fs.readFileSync(__dirname + '/cert/privatekey.pem').toString();
 var certificate = fs.readFileSync(__dirname + '/cert/certificate.pem').toString();
 var credentials = {key: privatekey, cert: certificate};
 
 var config = require('./config.js');
+var security = require('./lib/security');
 
 var app = express();
 var server = http.createServer(app);
@@ -26,6 +29,10 @@ app.use(function(req,res,next){
 app.all('/',function(req,res, next){
   res.sendFile('index.html', {root: config.server.distFolder});
 });
+
+//require('./lib/routes/security').addRoutes(app, security);
+
+app.use(errorhandler({ dumpExceptions: true, showStack: true}));
 
 server.listen(config.server.listenPort, '0.0.0.0', 511, function(){
   var open = require('open');
