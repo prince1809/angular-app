@@ -11,8 +11,11 @@
     <tr ng-repeat="project in projects">
       <td>{{project.name}}</td>
       <td>{{project.desc}}</td>
-      <td>{{project.name}}</td>
-      <td>{{project.desc}}</td>
+      <td>{{ getMyRoles(project) }}</td>
+      <td>
+        <a ng-click="manageBacklog(project)">Product Backlog</a>
+        <a ng-click="manageSprints(project)">Sprints</a>
+      </td>
     </tr>
   </tbody>
 </table>

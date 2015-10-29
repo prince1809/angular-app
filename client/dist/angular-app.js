@@ -37,6 +37,7 @@ angular.module('app',[
   'ngRoute',
   'projectsinfo',
   'dashboard',
+  'projects',
   'admin',
   'templates.app',
   'templates.common']);
@@ -90,7 +91,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
 
 }]);
 
-angular.module('dashboard', ['mongolabResourceHttp'])
+angular.module('dashboard', ['resources.projects'])
 
 .config(['$routeProvider', function($routeProvider){
 
@@ -105,31 +106,26 @@ angular.module('dashboard', ['mongolabResourceHttp'])
   });
 }])
 
-
-.factory('Project',function($mongolabResourceHttp){
-  return $mongolabResourceHttp('projects');
-})
-
 .controller('DashboardCtrl',['$scope','$location','projects',function($scope,$location,projects){
   $scope.projects = projects;
 }]);
 
-angular.module('projects', [])
+angular.module('projects', ['resources.projects'])
 
 .config(['$routeProvider', function($routeProvider){
 
   $routeProvider.when('/projects', {
     templateUrl: 'projects/projects-list.tpl.html',
-    controller: 'ProjectsViewCtrl',
+    controller: 'ProjectViewCtrl',
     resolve: {
-      projects:  function(){
-        return "";
+      projects:  function(Project){
+        return Project.all();
       }
     }
   });
 }])
 
-.controller('ProjectsViewCtrl',['$scope','$location',function($scope,$location,projects){
+.controller('ProjectViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
   $scope.projects = projects;
 }]);
 
@@ -151,13 +147,54 @@ angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','project
 }]);
 
 angular.module('resources.projects', ['mongolabResourceHttp']);
-angular.module('resources.projects').factory('Projects',['mongolabResourceHttp',function($mongolabResourceHttp){
+angular.module('resources.projects').factory('Project',function($mongolabResourceHttp){
 
-  //var Projects = $mongolabResource['projects'];
+  var Projects = $mongolabResourceHttp('projects');
+
+  Projects.forUser = function(userId, successcb, errorcb){
+    return Projects.query({},errorcb);
+  };
+
+  Projects.prototype.isProductOwner = function(userId){
+    return this.productOwner === userId;
+  };
+
+  Projects.prototype.canActAsProductOwner = function(userId){
+    return !this.isScrumMaster(userId) && !this.isDevTeamMember(userId);
+  };
+
+  Projects.prototype.isScrumMaster = function(userId){
+    return this.scrumMaster === userId;
+  };
+
+  Projects.prototype.canActAsScrumMaster = function(userId){
+    return !this.isProductOwner(userId);
+  };
+
+  Projects.prototype.canActAsDevTeamMember = function(userId){
+    return !this.isProductOwner(userId);
+  };
+
+  Projects.prototype.getRoles = function(userId){
+    var roles = [];
+
+    if(this.isProductOwner(userId)){
+      roles.push('PO');
+    }else {
+      if(this.isScrumMaster(userId)){
+        roles.push('SM');
+      }
+      if(this.isDevTeamMember(userId)){
+        roles.push('DEV');
+      }
+    }
+    return roles;
+  };
+
+
 
   return Projects;
-
-}]);
+});
 
 angular.module('services.i18nNotifications',['services.notifications']);
 
@@ -294,8 +331,11 @@ angular.module("projects/projects-list.tpl.html", []).run(["$templateCache", fun
     "    <tr ng-repeat=\"project in projects\">\n" +
     "      <td>{{project.name}}</td>\n" +
     "      <td>{{project.desc}}</td>\n" +
-    "      <td>{{project.name}}</td>\n" +
-    "      <td>{{project.desc}}</td>\n" +
+    "      <td>{{ getMyRoles(project) }}</td>\n" +
+    "      <td>\n" +
+    "        <a ng-click=\"manageBacklog(project)\">Product Backlog</a>\n" +
+    "        <a ng-click=\"manageSprints(project)\">Sprints</a>\n" +
+    "      </td>\n" +
     "    </tr>\n" +
     "  </tbody>\n" +
     "</table>\n" +

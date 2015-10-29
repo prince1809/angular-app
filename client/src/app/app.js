@@ -2,6 +2,7 @@ angular.module('app',[
   'ngRoute',
   'projectsinfo',
   'dashboard',
+  'projects',
   'admin',
   'templates.app',
   'templates.common']);
