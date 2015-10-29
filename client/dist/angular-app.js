@@ -1,4 +1,4 @@
-/*! angular-app - v1.0.0 - 2015-10-29
+/*! angular-app - v1.0.0 - 2015-10-30
  * http://princekr.com
  * Copyright (c) 2015  Prince;
  * Licensed 
@@ -129,20 +129,21 @@ angular.module('projects', ['resources.projects'])
   $scope.projects = projects;
 }]);
 
-angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
+angular.module('projectsinfo',['resources.projects'])
 
+.config(['$routeProvider', function($routeProvider){
   $routeProvider.when('/projectsinfo', {
     templateUrl: 'projectsinfo/list.tpl.html',
-    controller: 'ProjectsInfoCtrl',
+    controller: 'ProjectsInfoListCtrl',
     resolve: {
-      projects: ['Projects',function(Projects){
-        return Projects;
-      }]
+      projects: function(Project){
+        return Project.all();
+      }
     }
   });
-}]);
+}])
 
-angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','projects', function($scope,projects){
+.controller('ProjectsInfoListCtrl', ['$scope','$location','projects', function($scope,$location,projects){
   $scope.projects = projects;
 }]);
 

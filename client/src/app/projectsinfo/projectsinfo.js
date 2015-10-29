@@ -1,16 +1,17 @@
-angular.module('projectsinfo',[],['$routeProvider',function($routeProvider){
+angular.module('projectsinfo',['resources.projects'])
 
+.config(['$routeProvider', function($routeProvider){
   $routeProvider.when('/projectsinfo', {
     templateUrl: 'projectsinfo/list.tpl.html',
-    controller: 'ProjectsInfoCtrl',
+    controller: 'ProjectsInfoListCtrl',
     resolve: {
-      projects: ['Projects',function(Projects){
-        return Projects;
-      }]
+      projects: function(Project){
+        return Project.all();
+      }
     }
   });
-}]);
+}])
 
-angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','projects', function($scope,projects){
+.controller('ProjectsInfoListCtrl', ['$scope','$location','projects', function($scope,$location,projects){
   $scope.projects = projects;
 }]);
