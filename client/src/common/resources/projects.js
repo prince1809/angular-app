@@ -1,14 +1,7 @@
-angular.module('resources.projects', ['mongolabResource']);
-angular.module('resources.projects').factory('Projects',['mongolabResource',function($mongolabResource){
+angular.module('resources.projects', ['mongolabResourceHttp']);
+angular.module('resources.projects').factory('Projects',['mongolabResourceHttp',function($mongolabResourceHttp){
 
-  var Projects = $mongolabResource['projects'];
-   Projects.forUser = function(userId,successcb,errorcb){
-    return Projects.query({},successcb,errorcb);
-  }
-
-  Projects.prototype.isProductOwner = function(userId){
-    return this.productOwner === userId;
-  }
+  //var Projects = $mongolabResource['projects'];
 
   return Projects;
 

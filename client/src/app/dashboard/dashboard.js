@@ -1,4 +1,4 @@
-angular.module('dashboard', ['resources.projects'])
+angular.module('dashboard', ['mongolabResourceHttp'])
 
 .config(['$routeProvider', function($routeProvider){
 
@@ -6,12 +6,17 @@ angular.module('dashboard', ['resources.projects'])
     templateUrl: 'dashboard/dashboard.tpl.html',
     controller: 'DashboardCtrl',
     resolve: {
-      projects: ['Projects', function(Projects){
-        return Projects;
-      }]
+      projects:  function(Project){
+        return Project.all();
+      }
     }
   });
 }])
+
+
+.factory('Project',function($mongolabResourceHttp){
+  return $mongolabResourceHttp('projects');
+})
 
 .controller('DashboardCtrl',['$scope','$location','projects',function($scope,$location,projects){
   $scope.projects = projects;

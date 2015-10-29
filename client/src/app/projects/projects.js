@@ -1,4 +1,4 @@
-angular.module('projects', ['resources.projects'])
+angular.module('projects', [])
 
 .config(['$routeProvider', function($routeProvider){
 
@@ -6,13 +6,13 @@ angular.module('projects', ['resources.projects'])
     templateUrl: 'projects/projects-list.tpl.html',
     controller: 'ProjectsViewCtrl',
     resolve: {
-      projects: ['Projects', function(Projects){
-        return Projects;
-      }]
+      projects:  function(){
+        return "";
+      }
     }
   });
 }])
 
-.controller('ProjectsViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
+.controller('ProjectsViewCtrl',['$scope','$location',function($scope,$location,projects){
   $scope.projects = projects;
 }]);

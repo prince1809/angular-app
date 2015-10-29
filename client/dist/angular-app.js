@@ -37,16 +37,12 @@ angular.module('app',[
   'ngRoute',
   'projectsinfo',
   'dashboard',
-  'projects',
   'admin',
   'templates.app',
   'templates.common']);
 
 
-angular.module('app').constant('MONGOLAB_CONFIG',{
-  baseUrl: '/databases/',
-  dbName: 'ascrum'
-});
+angular.module('app').constant('MONGOLAB_CONFIG',{API_KEY:'4fb51e55e4b02e56a67b0b66', DB_NAME:'ascrum'});
 
 angular.module('app').constant('I18N.MESSAGES', {
   'errors.route.changeError': 'Route change error'
@@ -94,7 +90,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
 
 }]);
 
-angular.module('dashboard', ['resources.projects'])
+angular.module('dashboard', ['mongolabResourceHttp'])
 
 .config(['$routeProvider', function($routeProvider){
 
@@ -102,18 +98,23 @@ angular.module('dashboard', ['resources.projects'])
     templateUrl: 'dashboard/dashboard.tpl.html',
     controller: 'DashboardCtrl',
     resolve: {
-      projects: ['Projects', function(Projects){
-        return Projects;
-      }]
+      projects:  function(Project){
+        return Project.all();
+      }
     }
   });
 }])
+
+
+.factory('Project',function($mongolabResourceHttp){
+  return $mongolabResourceHttp('projects');
+})
 
 .controller('DashboardCtrl',['$scope','$location','projects',function($scope,$location,projects){
   $scope.projects = projects;
 }]);
 
-angular.module('projects', ['resources.projects'])
+angular.module('projects', [])
 
 .config(['$routeProvider', function($routeProvider){
 
@@ -121,14 +122,14 @@ angular.module('projects', ['resources.projects'])
     templateUrl: 'projects/projects-list.tpl.html',
     controller: 'ProjectsViewCtrl',
     resolve: {
-      projects: ['Projects', function(Projects){
-        return Projects;
-      }]
+      projects:  function(){
+        return "";
+      }
     }
   });
 }])
 
-.controller('ProjectsViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
+.controller('ProjectsViewCtrl',['$scope','$location',function($scope,$location,projects){
   $scope.projects = projects;
 }]);
 
@@ -149,17 +150,10 @@ angular.module('projectsinfo').controller('ProjectsInfoCtrl', ['$scope','project
   $scope.projects = projects;
 }]);
 
-angular.module('resources.projects', ['mongolabResource']);
-angular.module('resources.projects').factory('Projects',['mongolabResource',function($mongolabResource){
+angular.module('resources.projects', ['mongolabResourceHttp']);
+angular.module('resources.projects').factory('Projects',['mongolabResourceHttp',function($mongolabResourceHttp){
 
-  var Projects = $mongolabResource['projects'];
-   Projects.forUser = function(userId,successcb,errorcb){
-    return Projects.query({},successcb,errorcb);
-  }
-
-  Projects.prototype.isProductOwner = function(userId){
-    return this.productOwner === userId;
-  }
+  //var Projects = $mongolabResource['projects'];
 
   return Projects;
 
@@ -299,9 +293,9 @@ angular.module("projects/projects-list.tpl.html", []).run(["$templateCache", fun
     "  <tbody>\n" +
     "    <tr ng-repeat=\"project in projects\">\n" +
     "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.desc}}</td>\n" +
     "      <td>{{project.name}}</td>\n" +
-    "      <td>{{project.name}}</td>\n" +
-    "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.desc}}</td>\n" +
     "    </tr>\n" +
     "  </tbody>\n" +
     "</table>\n" +

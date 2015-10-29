@@ -2,16 +2,12 @@ angular.module('app',[
   'ngRoute',
   'projectsinfo',
   'dashboard',
-  'projects',
   'admin',
   'templates.app',
   'templates.common']);
 
 
-angular.module('app').constant('MONGOLAB_CONFIG',{
-  baseUrl: '/databases/',
-  dbName: 'ascrum'
-});
+angular.module('app').constant('MONGOLAB_CONFIG',{API_KEY:'4fb51e55e4b02e56a67b0b66', DB_NAME:'ascrum'});
 
 angular.module('app').constant('I18N.MESSAGES', {
   'errors.route.changeError': 'Route change error'
