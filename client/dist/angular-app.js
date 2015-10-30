@@ -1,4 +1,4 @@
-/*! angular-app - v1.0.0 - 2015-10-30
+/*! angular-app - v1.0.0 - 2015-10-31
  * http://princekr.com
  * Copyright (c) 2015  Prince;
  * Licensed 
@@ -91,7 +91,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
 
 }]);
 
-angular.module('dashboard', ['resources.projects'])
+angular.module('dashboard', ['resources.projects','resources.tasks'])
 
 .config(['$routeProvider', function($routeProvider){
 
@@ -101,13 +101,26 @@ angular.module('dashboard', ['resources.projects'])
     resolve: {
       projects:  function(Project){
         return Project.all();
+      },
+      tasks: function(Tasks){
+        return Tasks.all();
       }
     }
   });
 }])
 
-.controller('DashboardCtrl',['$scope','$location','projects',function($scope,$location,projects){
+.controller('DashboardCtrl',['$scope','$location','projects','tasks',function($scope,$location,projects,tasks){
   $scope.projects = projects;
+  $scope.tasks = tasks;
+
+  $scope.manageBacklog = function(projectId){
+    $location.path('/projects/' + projectId + '/productbacklog');
+  };
+
+  $scope.manageSprints = function(projectId){
+    $location.path('/projects/'+ projectId + '/sprints');
+  };
+  
 }]);
 
 angular.module('projects', ['resources.projects'])
@@ -195,6 +208,15 @@ angular.module('resources.projects').factory('Project',function($mongolabResourc
 
 
   return Projects;
+});
+
+angular.module('resources.tasks',['mongolabResourceHttp']);
+
+angular.module('resources.tasks').factory('Tasks',function($mongolabResourceHttp){
+
+  var Tasks = $mongolabResourceHttp('tasks');
+
+  return Tasks;
 });
 
 angular.module('services.i18nNotifications',['services.notifications']);
@@ -346,6 +368,27 @@ angular.module("projects/projects-list.tpl.html", []).run(["$templateCache", fun
 angular.module("projectsinfo/list.tpl.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("projectsinfo/list.tpl.html",
     "<h3>Projects Info</h3>\n" +
+    "<table class=\"table table-bordered table-condensed table-striped table-hover\">\n" +
+    "  <thead>\n" +
+    "    <tr>\n" +
+    "      <th class=\"span3\">Name</th>\n" +
+    "      <th class=\"span5\">Description</th>\n" +
+    "      <th class=\"span2\">My Role</th>\n" +
+    "      <th class=\"span2\">Tools</th>\n" +
+    "    </tr>\n" +
+    "  </thead>\n" +
+    "  <tbody>\n" +
+    "    <tr ng-repeat=\"project in projects\">\n" +
+    "      <td>{{project.name}}</td>\n" +
+    "      <td>{{project.desc}}</td>\n" +
+    "      <td>{{ getMyRoles(project) }}</td>\n" +
+    "      <td>\n" +
+    "        <a ng-click=\"manageBacklog(project)\">Product Backlog</a>\n" +
+    "        <a ng-click=\"manageSprints(project)\">Sprints</a>\n" +
+    "      </td>\n" +
+    "    </tr>\n" +
+    "  </tbody>\n" +
+    "</table>\n" +
     "");
 }]);
 

@@ -1,1 +1,22 @@
 <h3>Projects Info</h3>
+<table class="table table-bordered table-condensed table-striped table-hover">
+  <thead>
+    <tr>
+      <th class="span3">Name</th>
+      <th class="span5">Description</th>
+      <th class="span2">My Role</th>
+      <th class="span2">Tools</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="project in projects">
+      <td>{{project.name}}</td>
+      <td>{{project.desc}}</td>
+      <td>{{ getMyRoles(project) }}</td>
+      <td>
+        <a ng-click="manageBacklog(project)">Product Backlog</a>
+        <a ng-click="manageSprints(project)">Sprints</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
