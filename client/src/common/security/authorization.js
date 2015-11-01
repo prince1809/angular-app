@@ -10,14 +10,15 @@ angular.module('security.authorization',['security.service'])
     return securityAuthorization.requireAuthenticatedUser();
   }],
 
-  $get: ['security', function(security){
+  $get: ['security','securityRetryQueue', function(security,queue){
 
     var service = {
 
       requireAuthenticatedUser: function(){
         var promise = security.requestCurrentUser().then(function(userInfo){
           if(!security.isAuthenticated()){
-            return 'Some user info';
+            console.log('unauthenticated-client');
+            return queue.pushRetryFn('unauthenticated-client',service.requireAuthenticatedUser);
           }
         });
         return promise;
@@ -26,7 +27,7 @@ angular.module('security.authorization',['security.service'])
       requireAdminUser: function(){
         var promise = security.requestCurrentUser().then(function(userInfo){
           if(!security.isAdmin()){
-            return 'Not Admin';
+            return queue.pushRetryFn('unauthorized-client',service.requireAdminUser);
           }
         });
         return promise;

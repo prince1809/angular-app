@@ -1,6 +1,8 @@
-angular.module('security.service',[])
+angular.module('security.service',[
+  'security.retryQueue'
+])
 
-.factory('security',['$http','$location', function($http,$location){
+.factory('security',['$http','$q','$location', function($http,$q,$location){
 
   // Redirect to the given url
 
@@ -44,7 +46,7 @@ angular.module('security.service',[])
 
     requestCurrentUser: function(){
       if( service.isAuthenticated()){
-        return 'ISASMI';
+        return $q.when(service.currentUser);
       }else{
         return $http.get('/current-user').then(function(response){
           service.currentUser = response.data.user;
