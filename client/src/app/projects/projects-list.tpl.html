@@ -3,14 +3,14 @@
     <tr>
       <th class="span3">Name</th>
       <th class="span5">Description</th>
-      <th class="span2">My Role</th>
+      <th class="span2">My Role(s)</th>
       <th class="span2">Tools</th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="project in projects">
-      <td>{{project.name}}</td>
-      <td>{{project.desc}}</td>
+      <td ng-click="manageBacklog(project)">{{project.name}}</td>
+      <td ng-click="manageBacklog(project)">{{project.desc}}</td>
       <td>{{ getMyRoles(project) }}</td>
       <td>
         <a ng-click="manageBacklog(project)">Product Backlog</a>

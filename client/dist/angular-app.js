@@ -1,4 +1,4 @@
-/*! angular-app - v1.0.0 - 2015-10-31
+/*! angular-app - v1.0.0 - 2015-11-01
  * http://princekr.com
  * Copyright (c) 2015  Prince;
  * Licensed 
