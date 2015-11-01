@@ -4,6 +4,7 @@ angular.module('app',[
   'dashboard',
   'projects',
   'admin',
+  'security',
   'templates.app',
   'templates.common']);
 

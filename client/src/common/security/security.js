@@ -1,6 +1,6 @@
 angular.module('security.service',[])
 
-.factory('security',['$http','$q','$location', function($http,$q,$location){
+.factory('security',['$http','$location', function($http,$location){
 
   // Redirect to the given url
 
@@ -40,7 +40,30 @@ angular.module('security.service',[])
   var service = {
     getLoginReason: function(){
       return queue.retryReason();
+    },
+
+    requestCurrentUser: function(){
+      if( service.isAuthenticated()){
+        return 'ISASMI';
+      }else{
+        return $http.get('/current-user').then(function(response){
+          service.currentUser = response.data.user;
+          return service.currentUser;
+        });
+      }
+    },
+    currentUser: null,
+
+    // Is the current user authenticated
+    isAuthenticated: function(){
+      return !!service.currentUser;
+    },
+
+    // Is the current user an administrator
+    isAdmin: function(){
+      return !!(service.currentUser && service.currentUser.admin);
     }
+
   };
 
   return service;

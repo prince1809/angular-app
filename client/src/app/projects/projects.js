@@ -1,6 +1,6 @@
-angular.module('projects', ['resources.projects'])
+angular.module('projects', ['resources.projects','security.authorization'])
 
-.config(['$routeProvider', function($routeProvider){
+.config(['$routeProvider','securityAuthorizationProvider', function($routeProvider,securityAuthorizationProvider){
 
   $routeProvider.when('/projects', {
     templateUrl: 'projects/projects-list.tpl.html',
@@ -8,12 +8,13 @@ angular.module('projects', ['resources.projects'])
     resolve: {
       projects:  function(Project){
         return Project.all();
-      }
+      },
+      authenticatedUser: securityAuthorizationProvider.requireAuthenticatedUser
     }
   });
 }])
 
-.controller('ProjectViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
+.controller('ProjectViewCtrl',['$scope','$location','projects','security',function($scope,$location,projects,security){
   $scope.projects = projects;
 
   $scope.viewProject = function(project){
@@ -29,7 +30,9 @@ angular.module('projects', ['resources.projects'])
   }
 
   $scope.getMyRoles = function(project){
-    return 'PO';
+    if(security.currentUser){
+      return project.getRoles(security.currentUser.id);
+    }
   };
 
 }]);
