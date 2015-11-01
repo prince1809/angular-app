@@ -1,5 +1,7 @@
-angular.module('admin-users',[])
+angular.module('admin-users',[
+  'services.crud'
+])
 
-.config(['crudRouteProvider','securityAuthorizationProvider', function(crudRouteProvider,securityAuthorizationProvider){
+.config(['securityAuthorizationProvider', function(securityAuthorizationProvider){
 
 }]);
