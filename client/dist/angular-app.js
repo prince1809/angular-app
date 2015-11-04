@@ -1,9 +1,9 @@
-/*! angular-app - v1.0.0 - 2015-11-01
+/*! angular-app - v1.0.0 - 2015-11-05
  * http://princekr.com
  * Copyright (c) 2015  Prince;
  * Licensed 
  */
-angular.module('admin',['admin-projects']);
+angular.module('admin',['admin-projects','admin-users']);
 
 angular.module('admin-projects',[
 
@@ -33,12 +33,44 @@ angular.module('admin-projects',[
 
 }]);
 
+angular.module('admin-users-list',[]);
+
+angular.module('admin-users',[
+  'services.crud'
+])
+
+.config(['crudRouteProvider','securityAuthorizationProvider', function(crudRouteProvider,securityAuthorizationProvider){
+
+crudRouteProvider.routesFor('Users','admin')
+  .whenList({
+    users: ['Users', function(Users){
+      return Users.all();
+    }],
+    currentUser: securityAuthorizationProvider.requireAdminUser
+  })
+
+  .whenNew({
+    user: ['Users', function(Users) {
+      return Users();
+    }],
+    currentUser: securityAuthorizationProvider.requireAdminUser
+  })
+  .whenEdit({
+    user: ['$route', 'Users', function($route, Users){
+      return Users.getById($route.current.params.itemId);
+    }],
+    currentUser: securityAuthorizationProvider.requireAdminUser
+  });
+
+}]);
+
 angular.module('app',[
   'ngRoute',
   'projectsinfo',
   'dashboard',
   'projects',
   'admin',
+  'security',
   'templates.app',
   'templates.common']);
 
@@ -123,9 +155,9 @@ angular.module('dashboard', ['resources.projects','resources.tasks'])
   
 }]);
 
-angular.module('projects', ['resources.projects'])
+angular.module('projects', ['resources.projects','security.authorization'])
 
-.config(['$routeProvider', function($routeProvider){
+.config(['$routeProvider','securityAuthorizationProvider', function($routeProvider,securityAuthorizationProvider){
 
   $routeProvider.when('/projects', {
     templateUrl: 'projects/projects-list.tpl.html',
@@ -133,13 +165,33 @@ angular.module('projects', ['resources.projects'])
     resolve: {
       projects:  function(Project){
         return Project.all();
-      }
+      },
+      authenticatedUser: securityAuthorizationProvider.requireAuthenticatedUser
     }
   });
 }])
 
-.controller('ProjectViewCtrl',['$scope','$location','projects',function($scope,$location,projects){
+.controller('ProjectViewCtrl',['$scope','$location','projects','security',function($scope,$location,projects,security){
   $scope.projects = projects;
+
+  $scope.viewProject = function(project){
+    $location.path('/projects/'+project.$id());
+  };
+
+  $scope.manageBacklog = function(project){
+    $location.path('/projets/'+project.$id()+'/productbacklog');
+  }
+
+  $scope.manageSprints = function(project){
+    $location.path('/projets/'+project.$id()+'/sprints');
+  }
+
+  $scope.getMyRoles = function(project){
+    if(security.currentUser){
+      return project.getRoles(security.currentUser.id);
+    }
+  };
+
 }]);
 
 angular.module('projectsinfo',['resources.projects'])
@@ -219,6 +271,275 @@ angular.module('resources.tasks').factory('Tasks',function($mongolabResourceHttp
   return Tasks;
 });
 
+angular.module('security.authorization',['security.service'])
+
+.provider('securityAuthorization',{
+
+  requireAdminUser: ['securityAuthorization', function(securityAuthorization){
+    return securityAuthorization.requireAdminUser();
+  }],
+
+  requireAuthenticatedUser: ['securityAuthorization', function(securityAuthorization){
+    return securityAuthorization.requireAuthenticatedUser();
+  }],
+
+  $get: ['security','securityRetryQueue', function(security,queue){
+
+    var service = {
+
+      requireAuthenticatedUser: function(){
+        var promise = security.requestCurrentUser().then(function(userInfo){
+          if(!security.isAuthenticated()){
+            console.log('unauthenticated-client');
+            return queue.pushRetryFn('unauthenticated-client',service.requireAuthenticatedUser);
+          }
+        });
+        return promise;
+      },
+
+      requireAdminUser: function(){
+        var promise = security.requestCurrentUser().then(function(userInfo){
+          if(!security.isAdmin()){
+            return queue.pushRetryFn('unauthorized-client',service.requireAdminUser);
+          }
+        });
+        return promise;
+      }
+
+    };
+    return service;
+  }]
+});
+
+angular.module('security',[
+  'security.service'
+]);
+
+angular.module('security.retryQueue',[])
+
+.factory('securityRetryQueue',['$q','$log',function($q,$log){
+
+  var retryQueue = [];
+
+  var service = {
+
+    // The security service puts its own handler in here
+    onItemAddedCallbacks: [],
+
+    hasMore: function(){
+      return retryQueue.length > 0;
+    },
+    push: function(retryItem){
+
+    },
+
+    pushRetryFn: function(reason, retryFn){
+        if(arguments.length == 1){
+          retryFn = reason;
+          reason = undefined;
+        }
+
+        var deferred = $q.defer();
+        var retryItem = {
+          reason: reason,
+          retry: function(){
+            $q.when(retryFn()).then(function(value){
+              deferred.resolve(value);
+            }, function(value){
+              deferred.reject(value);
+            });
+          },
+          cancel: function(){
+            deferred.reject();
+          }
+        };
+        service.push(retryItem);
+        return deferred.promise;
+    }
+
+  };
+
+  return service;
+}]);
+
+angular.module('security.service',[
+  'security.retryQueue'
+])
+
+.factory('security',['$http','$q','$location', function($http,$q,$location){
+
+  // Redirect to the given url
+
+  function redirect(url){
+    url = url || '/';
+
+    $location.path(url);
+  }
+
+  // Login from dialog stuff
+  var loginDialog = null;
+  function openLoginDialog(){
+    if(loginDialog){
+      throw new Error(' Trying to open a dialog that is already open');
+    }
+    loginDialog = $dialog.dialog();
+    loginDialog.open('security/login/form.tpl.html', 'LoginFormController').then(openLoginDialogClose);
+  }
+
+  function closeLoginDialog(success){
+    if(loginDialog){
+      loginDialog.close(success)
+    }
+  }
+
+  function openLoginDialogClose(success){
+    loginDialog = null;
+
+    if(success){
+      queue.retryAll();
+    }else {
+      queue.cancelAll();
+      redirect();
+    }
+  }
+
+  var service = {
+    getLoginReason: function(){
+      return queue.retryReason();
+    },
+
+    requestCurrentUser: function(){
+      if( service.isAuthenticated()){
+        return $q.when(service.currentUser);
+      }else{
+        return $http.get('/current-user').then(function(response){
+          service.currentUser = response.data.user;
+          return service.currentUser;
+        });
+      }
+    },
+    currentUser: null,
+
+    // Is the current user authenticated
+    isAuthenticated: function(){
+      return !!service.currentUser;
+    },
+
+    // Is the current user an administrator
+    isAdmin: function(){
+      return !!(service.currentUser && service.currentUser.admin);
+    }
+
+  };
+
+  return service;
+}]);
+
+angular.module('services.crud',['services.crudRouteProvider']);
+angular.module('services.crud').factory('crudEditMethods',function(){
+
+  return function (itemName,item,formName,successcb,errorcb){
+
+    var mixin = {};
+
+    mixin[itemName] = item;
+
+    mixin[itemName+'copy'] = angular.copy(item);
+
+    mixin.save = function(){
+      this[itemName].$saveOrUpdate(successcb.successcb,errorcb,errorcb);
+    }
+
+  }
+
+});
+
+angular.module('services.crud').factory('crudListMethods',['$location', function($location){
+
+}]);
+
+(function() {
+
+  function crudRouteProvider($routeProvider) {
+    this.$get = angular.noop;
+
+
+    this.routesFor = function(resourceName, urlPrefix, routePrefix) {
+      var baseUrl = resourceName.toLowerCase();
+      var baseRoute = '/' + resourceName.toLowerCase();
+      routePrefix = routePrefix || urlPrefix;
+
+      // Prepend the urlPrefix if available.
+      if ( angular.isString(urlPrefix) && urlPrefix !== '' ) {
+        baseUrl = urlPrefix + '/' + baseUrl;
+      }
+
+      // Prepend the routePrefix if it was provided;
+      if (routePrefix !== null && routePrefix !== undefined && routePrefix !== '') {
+        baseRoute = '/' + routePrefix + baseRoute;
+      }
+
+      // Create the templateUrl for a route to our resource that does the specified operation.
+      var templateUrl = function(operation) {
+        return baseUrl + '/' + resourceName.toLowerCase() +'-'+operation.toLowerCase()+'.tpl.html';
+      };
+      // Create the controller name for a route to our resource that does the specified operation.
+      var controllerName = function(operation) {
+        return resourceName + operation +'Ctrl';
+      };
+
+      var routeBuilder = {
+        // Create a route that will handle showing a list of items
+        whenList: function(resolveFns) {
+          routeBuilder.when(baseRoute, {
+            templateUrl: templateUrl('List'),
+            controller: controllerName('List'),
+            resolve: resolveFns
+          });
+          return routeBuilder;
+        },
+        // Create a route that will handle creating a new item
+        whenNew: function(resolveFns) {
+          routeBuilder.when(baseRoute +'/new', {
+            templateUrl: templateUrl('Edit'),
+            controller: controllerName('Edit'),
+            resolve: resolveFns
+          });
+          return routeBuilder;
+        },
+        // Create a route that will handle editing an existing item
+        whenEdit: function(resolveFns) {
+          routeBuilder.when(baseRoute+'/:itemId', {
+            templateUrl: templateUrl('Edit'),
+            controller: controllerName('Edit'),
+            resolve: resolveFns
+          });
+          return routeBuilder;
+        },
+
+        when: function(path, route) {
+          $routeProvider.when(path, route);
+          return routeBuilder;
+        },
+
+        otherwise: function(params) {
+          $routeProvider.otherwise(params);
+          return routeBuilder;
+        },
+        
+        $routeProvider: $routeProvider
+      };
+      return routeBuilder;
+    };
+  }
+
+  crudRouteProvider.$inject = ['$routeProvider'];
+
+  console.log(crudRouteProvider);
+
+  angular.module('services.crudRouteProvider', ['ngRoute']).provider('crudRoute', crudRouteProvider);
+})();
+
 angular.module('services.i18nNotifications',['services.notifications']);
 
 
@@ -263,8 +584,8 @@ angular.module("dashboard/dashboard.tpl.html", []).run(["$templateCache", functi
   $templateCache.put("dashboard/dashboard.tpl.html",
     "<h4>My Projects</h4>\n" +
     "<div ng-include=\"'projects/projects-list.tpl.html'\">\n" +
-    "\n" +
     "</div>\n" +
+    "\n" +
     "<h4>My Tasks</h4>\n" +
     "<table class=\"table table-bordered table-condensed table-striped table-hover\">\n" +
     "  <thead>\n" +
@@ -346,14 +667,14 @@ angular.module("projects/projects-list.tpl.html", []).run(["$templateCache", fun
     "    <tr>\n" +
     "      <th class=\"span3\">Name</th>\n" +
     "      <th class=\"span5\">Description</th>\n" +
-    "      <th class=\"span2\">My Role</th>\n" +
+    "      <th class=\"span2\">My Role(s)</th>\n" +
     "      <th class=\"span2\">Tools</th>\n" +
     "    </tr>\n" +
     "  </thead>\n" +
     "  <tbody>\n" +
     "    <tr ng-repeat=\"project in projects\">\n" +
-    "      <td>{{project.name}}</td>\n" +
-    "      <td>{{project.desc}}</td>\n" +
+    "      <td ng-click=\"manageBacklog(project)\">{{project.name}}</td>\n" +
+    "      <td ng-click=\"manageBacklog(project)\">{{project.desc}}</td>\n" +
     "      <td>{{ getMyRoles(project) }}</td>\n" +
     "      <td>\n" +
     "        <a ng-click=\"manageBacklog(project)\">Product Backlog</a>\n" +
