@@ -40,6 +40,7 @@ app.use(cookieSession({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(xsrf);
+security.initialize(config.mongo.dbUrl, config.mongo.apiKey, config.security.dbName, config.security.usersCollection);
 
 
 
