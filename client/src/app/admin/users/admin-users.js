@@ -1,5 +1,6 @@
 angular.module('admin-users',[
-  'services.crud'
+  'services.crud',
+  'security.authorization'
 ])
 
 .config(['crudRouteProvider','securityAuthorizationProvider', function(crudRouteProvider,securityAuthorizationProvider){
@@ -8,8 +9,8 @@ crudRouteProvider.routesFor('Users','admin')
   .whenList({
     users: ['Users', function(Users){
       return Users.all();
-    }],
-    currentUser: securityAuthorizationProvider.requireAdminUser
+    }]
+    //currentUser: securityAuthorizationProvider.requireAdminUser
   })
 
   .whenNew({

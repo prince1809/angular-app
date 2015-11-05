@@ -44,10 +44,42 @@ angular.module('security.service',[
       return queue.retryReason();
     },
 
+    // show the modal login dialog
+    showLogin: function(){
+      openLoginDialog();
+    },
+
+    // Attempt to authenticate a user by the given username and password
+    login: function(email,password){
+      var request = $http.post('/login',{ email: email, password: password });
+      return request.then(function(response){
+        service.currentUser = response.data.user;
+        if(service.isAuthenticated()){
+          closeLoginDialog(true);
+        }
+        return service.isAuthenticated();
+      });
+    },
+
+    // Give up trying login and clear the retry queue
+    cancelLogin: function(){
+      closeLoginDialog(false);
+      redirect();
+    },
+
+    logout: function(redirectTo){
+      $http.post('/logout').then(function(){
+        service.currentUser = null;
+        redirect(redirectTo);
+      });
+    },
+
     requestCurrentUser: function(){
       if( service.isAuthenticated()){
+        console.log(service.currentUser);
         return $q.when(service.currentUser);
       }else{
+        console.log(service.currentUser);
         return $http.get('/current-user').then(function(response){
           service.currentUser = response.data.user;
           return service.currentUser;

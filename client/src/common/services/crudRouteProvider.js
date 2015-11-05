@@ -25,6 +25,7 @@
       };
       // Create the controller name for a route to our resource that does the specified operation.
       var controllerName = function(operation) {
+        console.log(operation);
         return resourceName + operation +'Ctrl';
       };
 
@@ -66,7 +67,7 @@
           $routeProvider.otherwise(params);
           return routeBuilder;
         },
-        
+
         $routeProvider: $routeProvider
       };
       return routeBuilder;
@@ -74,8 +75,6 @@
   }
 
   crudRouteProvider.$inject = ['$routeProvider'];
-
-  console.log(crudRouteProvider);
 
   angular.module('services.crudRouteProvider', ['ngRoute']).provider('crudRoute', crudRouteProvider);
 })();

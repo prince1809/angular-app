@@ -33,10 +33,15 @@ angular.module('admin-projects',[
 
 }]);
 
-angular.module('admin-users-list',[]);
+angular.module('admin-users-list',['services.crud'])
+.controller('UsersListCtrl',['$scope',function($scope){
+
+  console.log('Log to controller');
+}]);
 
 angular.module('admin-users',[
-  'services.crud'
+  'services.crud',
+  'security.authorization'
 ])
 
 .config(['crudRouteProvider','securityAuthorizationProvider', function(crudRouteProvider,securityAuthorizationProvider){
@@ -45,8 +50,8 @@ crudRouteProvider.routesFor('Users','admin')
   .whenList({
     users: ['Users', function(Users){
       return Users.all();
-    }],
-    currentUser: securityAuthorizationProvider.requireAdminUser
+    }]
+    //currentUser: securityAuthorizationProvider.requireAdminUser
   })
 
   .whenNew({
@@ -83,7 +88,11 @@ angular.module('app').constant('I18N.MESSAGES', {
 
 angular.module('app').config(['$routeProvider','$locationProvider', function($routeProvider,$locationProvider){
   $locationProvider.html5Mode(true);
-  //$routeProvider.otherwise({ redirectTo: '/projectsinfo'});
+  $routeProvider.otherwise({ redirectTo: '/projectsinfo'});
+}]);
+
+angular.module('app').run(['security',function(security){
+  security.requestCurrentUser();
 }]);
 
 angular.module('app').controller('AppCtrl', ['$scope',function($scope){
@@ -99,15 +108,14 @@ angular.module('app').controller('AppCtrl', ['$scope',function($scope){
   });
 }]);
 
-angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
-  function($scope,$location,$route){
+angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','security',
+  function($scope,$location,$route,security){
 
   $scope.location = $location;
   $scope.breadcrumbs = 'breadcrumbs';
 
-  $scope.isAuthenticated = 'no';
-
-  $scope.isAdmin = 'Yes';
+  $scope.isAuthenticated = security.isAuthenticated;
+  $scope.isAdmin = security.isAdmin;
 
   $scope.home = function(){
     $location.path('/dashboard');
@@ -268,6 +276,10 @@ angular.module('resources.tasks').factory('Tasks',function($mongolabResourceHttp
 
   var Tasks = $mongolabResourceHttp('tasks');
 
+  Tasks.forProductBacklogItem = function(productbacklogItem){
+    return Tasks.query({productbacklogItem:productbacklogItem});
+  }
+
   return Tasks;
 });
 
@@ -408,10 +420,42 @@ angular.module('security.service',[
       return queue.retryReason();
     },
 
+    // show the modal login dialog
+    showLogin: function(){
+      openLoginDialog();
+    },
+
+    // Attempt to authenticate a user by the given username and password
+    login: function(email,password){
+      var request = $http.post('/login',{ email: email, password: password });
+      return request.then(function(response){
+        service.currentUser = response.data.user;
+        if(service.isAuthenticated()){
+          closeLoginDialog(true);
+        }
+        return service.isAuthenticated();
+      });
+    },
+
+    // Give up trying login and clear the retry queue
+    cancelLogin: function(){
+      closeLoginDialog(false);
+      redirect();
+    },
+
+    logout: function(redirectTo){
+      $http.post('/logout').then(function(){
+        service.currentUser = null;
+        redirect(redirectTo);
+      });
+    },
+
     requestCurrentUser: function(){
       if( service.isAuthenticated()){
+        console.log(service.currentUser);
         return $q.when(service.currentUser);
       }else{
+        console.log(service.currentUser);
         return $http.get('/current-user').then(function(response){
           service.currentUser = response.data.user;
           return service.currentUser;
@@ -485,6 +529,7 @@ angular.module('services.crud').factory('crudListMethods',['$location', function
       };
       // Create the controller name for a route to our resource that does the specified operation.
       var controllerName = function(operation) {
+        console.log(operation);
         return resourceName + operation +'Ctrl';
       };
 
@@ -526,7 +571,7 @@ angular.module('services.crud').factory('crudListMethods',['$location', function
           $routeProvider.otherwise(params);
           return routeBuilder;
         },
-        
+
         $routeProvider: $routeProvider
       };
       return routeBuilder;
@@ -534,8 +579,6 @@ angular.module('services.crud').factory('crudListMethods',['$location', function
   }
 
   crudRouteProvider.$inject = ['$routeProvider'];
-
-  console.log(crudRouteProvider);
 
   angular.module('services.crudRouteProvider', ['ngRoute']).provider('crudRoute', crudRouteProvider);
 })();

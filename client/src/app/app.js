@@ -17,7 +17,11 @@ angular.module('app').constant('I18N.MESSAGES', {
 
 angular.module('app').config(['$routeProvider','$locationProvider', function($routeProvider,$locationProvider){
   $locationProvider.html5Mode(true);
-  //$routeProvider.otherwise({ redirectTo: '/projectsinfo'});
+  $routeProvider.otherwise({ redirectTo: '/projectsinfo'});
+}]);
+
+angular.module('app').run(['security',function(security){
+  security.requestCurrentUser();
 }]);
 
 angular.module('app').controller('AppCtrl', ['$scope',function($scope){
@@ -33,15 +37,14 @@ angular.module('app').controller('AppCtrl', ['$scope',function($scope){
   });
 }]);
 
-angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route',
-  function($scope,$location,$route){
+angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','security',
+  function($scope,$location,$route,security){
 
   $scope.location = $location;
   $scope.breadcrumbs = 'breadcrumbs';
 
-  $scope.isAuthenticated = 'no';
-
-  $scope.isAdmin = 'Yes';
+  $scope.isAuthenticated = security.isAuthenticated;
+  $scope.isAdmin = security.isAdmin;
 
   $scope.home = function(){
     $location.path('/dashboard');
