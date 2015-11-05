@@ -17,10 +17,16 @@
   },
   "homepage": "https://github.com/prince1809/angularjs-app#readme",
   "dependencies": {
+    "body-parser": "^1.14.1",
+    "compression": "^1.6.0",
+    "cookie-parser": "^1.4.0",
+    "cookie-session": "^1.2.0",
     "errorhandler": "^1.4.2",
     "express": "^4.13.3",
     "express-namespace": "^0.1.1",
-    "passport": "^0.3.0"
+    "morgan": "^1.6.1",
+    "passport": "^0.3.0",
+    "serve-favicon": "^2.3.0"
   },
   "devDependencies": {
     "open": "0.0.5"

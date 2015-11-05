@@ -4,6 +4,7 @@ angular.module('app',[
   'dashboard',
   'projects',
   'admin',
+  'services.httpRequestTracker',
   'security',
   'templates.app',
   'templates.common']);
@@ -37,8 +38,8 @@ angular.module('app').controller('AppCtrl', ['$scope',function($scope){
   });
 }]);
 
-angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','security',
-  function($scope,$location,$route,security){
+angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','security','httpRequestTracker',
+  function($scope,$location,$route,security,httpRequestTracker){
 
   $scope.location = $location;
   $scope.breadcrumbs = 'breadcrumbs';
@@ -47,7 +48,11 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','s
   $scope.isAdmin = security.isAdmin;
 
   $scope.home = function(){
-    $location.path('/dashboard');
+    if(security.isAuthenticated()){
+      $location.path('/dashboard');
+    }else{
+      $location.path('/projectsinfo');
+    }
   };
 
   $scope.isNavbarActive = function(navBarPath){
@@ -55,7 +60,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','s
   };
 
   $scope.hasPendingRequests = function(){
-    return false;
+    return httpRequestTracker.hasPendingRequests();
   };
 
 }]);

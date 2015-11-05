@@ -75,6 +75,7 @@ angular.module('app',[
   'dashboard',
   'projects',
   'admin',
+  'services.httpRequestTracker',
   'security',
   'templates.app',
   'templates.common']);
@@ -108,8 +109,8 @@ angular.module('app').controller('AppCtrl', ['$scope',function($scope){
   });
 }]);
 
-angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','security',
-  function($scope,$location,$route,security){
+angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','security','httpRequestTracker',
+  function($scope,$location,$route,security,httpRequestTracker){
 
   $scope.location = $location;
   $scope.breadcrumbs = 'breadcrumbs';
@@ -118,7 +119,11 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','s
   $scope.isAdmin = security.isAdmin;
 
   $scope.home = function(){
-    $location.path('/dashboard');
+    if(security.isAuthenticated()){
+      $location.path('/dashboard');
+    }else{
+      $location.path('/projectsinfo');
+    }
   };
 
   $scope.isNavbarActive = function(navBarPath){
@@ -126,7 +131,7 @@ angular.module('app').controller('HeaderCtrl',['$scope', '$location','$route','s
   };
 
   $scope.hasPendingRequests = function(){
-    return false;
+    return httpRequestTracker.hasPendingRequests();
   };
 
 }]);
@@ -582,6 +587,17 @@ angular.module('services.crud').factory('crudListMethods',['$location', function
 
   angular.module('services.crudRouteProvider', ['ngRoute']).provider('crudRoute', crudRouteProvider);
 })();
+
+angular.module('services.httpRequestTracker',[]);
+angular.module('services.httpRequestTracker').factory('httpRequestTracker',['$http',function($http){
+
+  var httpRequestTracker = {};
+  httpRequestTracker.hasPendingRequests = function(){
+    return $http.pendingRequests.length > 0;
+  };
+
+  return httpRequestTracker;
+}]);
 
 angular.module('services.i18nNotifications',['services.notifications']);
 
