@@ -20,7 +20,7 @@ passport.serializeUser(function(user, done){
   done(null, user._id.$oid);
 });
 
-passport.desrializeUser(this.get.bind(this));
+passport.deserializeUser(this.get.bind(this));
 this.name = MongoDBStrategy.name;
 
 }
@@ -35,6 +35,10 @@ MongoDBStrategy.prototype.get = function(id, done){
   var request = rest.get(this.baseUrl + id, {qs: query, json: {}}, function(err, response, body){
     done(err,body);
   });
+};
+
+MongoDBStrategy.prototype.verifyUser = function(email, password, done){
+
 }
 
 module.exports = MongoDBStrategy;

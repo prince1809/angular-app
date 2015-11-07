@@ -4,8 +4,8 @@ module.exports = {
 
     mongo: {
       dbUrl: 'https://api.mongolab.com/api/1',
-      apiKey: '4fb44bb44bb44bbbb44bb44'
-      
+      apiKey: '4fb51e55e4b02e56a67b0b66'
+
     },
   security: {
     dbName: 'ascrum',

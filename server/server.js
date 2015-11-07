@@ -19,6 +19,7 @@ var config = require('./config.js');
 var security = require('./lib/security');
 var protectJSON = require('./lib/protectJSON');
 var xsrf = require('./lib/xsrf');
+var mongoProxy = require('./lib/mongo-proxy');
 
 var app = express();
 var server = http.createServer(app);
@@ -30,7 +31,7 @@ var sercureServer = https.createServer(credentials,app);
 require('./lib/routes/static').addRoutes(app, config);
 
 app.use(protectJSON);
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 app.use(bodyParser.raw());
 app.use(cookieParser(config.server.cookieSecret));
 app.use(cookieSession({
@@ -48,15 +49,34 @@ app.use(function(req,res,next){
   if( req.user ){
     console.log('Current user: ', req.user.firstName, req.user.lastName);
   }else{
-    console.log('____________________');
+    console.log('unauthenticated');
   }
   next();
 });
 
 app.namespace('/databases/:db/collections/:collection*', function(){
 
+  app.all('/',function(req, res, next){
+    if(req.method !== 'GET'){
+      security.authenticationRequired(req,res,next);
+    }else{
+      next();
+    }
+  });
+
+  app.all('/', function(req, res, next){
+    if(req.method !== 'GET' && (req.params.collection === 'users' || req.params.collection === 'projects')){
+      return security.adminRequired(req,res,next);
+    }
+    next();
+  });
+
+  // Proxy database calls to the mongoDB
+  //app.all('/',mongoProxy(config.mongo.dbUrl, config.mongo.apiKey));
+
 });
 
+require('./lib/routes/security').addRoutes(app, security);
 require('./lib/routes/appFile').addRoutes(app,config);
 
 app.use(errorhandler({ dumpExceptions: true, showStack: true}));
